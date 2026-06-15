@@ -1,0 +1,13 @@
+streamlit
+langchain
+langchain-community
+langchain-groq
+langgraph
+pymupdf
+pandas
+numpy
+scikit-learn
+chromadb
+sentence-transformers
+python-dotenv
+sqlite-utils
