@@ -8,6 +8,8 @@ from agents.job_parser import extract_job_skills
 from agents.recommendation_agent import generate_recommendation
 from utils.matching import calculate_match_score
 from agents.resume_optimizer import optimize_resume
+from agents.cover_letter_generator import generate_cover_letter
+from utils.doc_generator import create_cover_letter_docx
 
 st.set_page_config(
     page_title="AI Career Copilot",
@@ -61,6 +63,10 @@ if uploaded_file:
         st.subheader("Job Match Analysis")
         job_description = st.text_area("Paste Job Description",height=250)
 
+        cover_letter = generate_cover_letter(resume_data,job_description)
+        candidate_name = resume_data.get("name","Candidate")
+        cover_letter_docx = create_cover_letter_docx(cover_letter,candidate_name)
+
         if st.button("Analyze Match"):
             if not job_description.strip():
                 st.warning("Please paste a job description:")
@@ -94,3 +100,10 @@ if uploaded_file:
 
                 st.subheader("Resume Optimization Suggestions")
                 st.write(resume_optimization)
+
+                st.subheader("Cover Letter")
+                st.write(cover_letter)
+                st.download_button(label="Download Cover Letter",
+                                   data=cover_letter_docx,
+                                   file_name="cover_letter.docx",
+                                   mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
