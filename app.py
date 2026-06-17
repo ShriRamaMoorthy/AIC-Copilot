@@ -7,6 +7,7 @@ from agents.resume_summarizer import generate_resume_summary
 from agents.job_parser import extract_job_skills
 from agents.recommendation_agent import generate_recommendation
 from utils.matching import calculate_match_score
+from agents.resume_optimizer import optimize_resume
 
 st.set_page_config(
     page_title="AI Career Copilot",
@@ -33,6 +34,7 @@ if uploaded_file:
         resume_text = extract_text_from_pdf(pdf_path)
         resume_data = parse_resume(resume_text)
         summary = generate_resume_summary(resume_text)
+        
 
         st.success("Resume Uploaded Successfully!!!")
         st.subheader("Resume Overview")
@@ -72,6 +74,8 @@ if uploaded_file:
 
                 recommendations = generate_recommendation(match_result["missing_skills"],job_description)
 
+                resume_optimization = optimize_resume(resume_text,job_description,match_result['missing_skills'])
+
                 st.subheader("Match Results")
 
                 st.metric("Match Score",f"{match_result['match_score']}%")
@@ -84,5 +88,9 @@ if uploaded_file:
                 
                 st.subheader("Job Skills")
                 st.write(job_skills)
+                
                 st.subheader("Career Recommendations")
                 st.write(recommendations)
+
+                st.subheader("Resume Optimization Suggestions")
+                st.write(resume_optimization)
