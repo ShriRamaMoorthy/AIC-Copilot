@@ -1,6 +1,7 @@
 from agents.resume_optimizer import (optimize_resume)
 
 def graph_optimizer_agent(state):
+    print("\nExecuting graph_optimizer_agent")
     state['optimized_resume']=(
         optimize_resume(
             state["resume_text"],

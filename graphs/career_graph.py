@@ -9,6 +9,7 @@ from agents.graph_cover_letter_agent import(graph_cover_letter_agent)
 
 def route_after_match(state):
     score = state["match_result"]["match_score"]
+    print(f"\nRouting Decision => Match Score: {score}")
     if score>=80:
         return "cover_letter"
     return "recommendation"
@@ -22,13 +23,21 @@ graph.add_node("graph_recommendation_agent",graph_recommendation_agent)
 graph.add_node("graph_optimizer_agent",graph_optimizer_agent)
 graph.add_node("graph_cover_letter_agent",graph_cover_letter_agent)
 graph.set_entry_point("graph_resume_agent")
+
+
 graph.add_edge("graph_resume_agent","graph_job_agent")
 graph.add_edge("graph_job_agent","graph_match_agent")
-graph.add_edge("graph_match_agent","graph_recommendation_agent")
+#graph.add_edge("graph_match_agent","graph_recommendation_agent")
+graph.add_conditional_edges(
+    "graph_match_agent",
+    route_after_match,
+    {
+        "cover_letter":"graph_cover_letter_agent",
+        "recommendation":"graph_recommendation_agent"
+    }
+    )
 graph.add_edge("graph_recommendation_agent","graph_optimizer_agent")
 graph.add_edge("graph_optimizer_agent","graph_cover_letter_agent")
 graph.add_edge("graph_cover_letter_agent",END)
 
 career_graph = graph.compile()
-
-graph.add_conditional_edges()
