@@ -1,9 +1,10 @@
-import os 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import(Chroma)
-from langchain_huggingface import(HuggingFaceEmbeddings)
+import os
 from pypdf import PdfReader
-from docx import Document
+from docx import Document as DocxDocument
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 
 BASE_DIR = os.path.dirname(
     os.path.dirname(
@@ -12,82 +13,94 @@ BASE_DIR = os.path.dirname(
 )
 
 KB_PATH = os.path.join(BASE_DIR,"knowledge_base")
-
-kb_path = KB_PATH
-
 CHROMA_PATH = os.path.join(BASE_DIR,"vector_db","chroma_db")
 
 def load_documents():
-    documents=[]
-    kb_path = KB_PATH
-    for root,_,files in os.walk(kb_path):
+    documents = []
+
+    for root, _, files in os.path(KB_PATH):
+        folder_name = os.path.basename(root)
         for file in files:
             file_path = os.path.join(root,file)
-            text=""
-            print(f"Searching in: {kb_path}")
-            print(f"Found file: {file_path}")
-            try:
-                if file.endswith('.txt'):
-                    with open(file_path,'r',encoding='utf-8') as f:
-                        text=f.read()
+            text = ""
 
-                elif file.endswith('.pdf'):
+            try:
+                if file.endswith(".txt"):
+                    with open(file_path,'r',encoding="utf-8") as f:
+                        text = f.read()
+                elif file.endswith(".pdf"):
                     reader = PdfReader(file_path)
                     for page in reader.pages:
                         page_text = page.extract_text()
                         if page_text:
-                            text+=page_text+'\n'
-
-                elif file.endswith('.docx'):
-                    doc = Document(file_path)
+                            text+=page_text+"\n"
+                elif file.endswith(".docx"):
+                    doc = DocxDocument(file_path)
                     for para in doc.paragraphs:
                         if para.text.strip():
-                            text+=para.text+"\n"
+                            text+=(para.text+'\n')
                 
                 if text.strip():
-                    documents.append(text)
-
+                    documents.append({
+                        "content":text,
+                        "source":file,
+                        "category":folder_name
+                    })
+            
             except Exception as e:
-                print(f'Error reading {file_path}:{str(e)}')
-    
+                print(f'Error reading {file_path}:{e}')
     return documents
 
 
-
 def chunk_documents(documents):
-    splitter=(RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=100))
+    splitter = (RecursiveCharacterTextSplitter(
+        chunk_size=500,chunk_overlap=100
+    ))
     chunks=[]
     for doc in documents:
-        chunks.extend(
-            splitter.split_text(doc)
+        split_texts = splitter.split_text(
+            doc["content"]
         )
+
+        for chunk in split_texts:
+            chunks.append(
+
+                Document(
+                    page_content=chunk,
+
+                metadata={
+                    "source":doc["source"],
+                    "category":doc["category"]
+                }
+                )
+            )
     return chunks
 
 
-
 def build_vector_db():
-    docs=load_documents()
-    chunks=chunk_documents(docs)
+    docs = load_documents()
+    chunks = chunk_documents(docs)
     print(f'Loaded {len(chunks)} chunks')
 
-    embeddings=(
-        HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
+    if not chunks:
+        raise ValueError("No Chunks Found.")
+    
+    embeddings = (HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"))
+
+    if os.path.exists(CHROMA_PATH):
+        import shutil
+
+        shutil.rmtree(CHROMA_PATH)
+    
+    vector_db = (
+        Chroma.from_documents(
+            documents=chunks,
+            embedding=embeddings,
+            persist_directory=CHROMA_PATH
         )
     )
 
-    if not chunks:
-        raise ValueError("No chunks created. Check knowledge_base path.")
+    print("Vector DB created successfully")
 
-    vector_db = Chroma.from_texts(
-        texts=chunks,
-        embedding=embeddings,
-        persist_directory=CHROMA_PATH
-    )
-    #vector_db.persist()
-
-    print("Vector DB created Successfully")
-
-if __name__=='__main__':
-    build_vector_db()
-
+    if __name__ == "__main__":
+        build_vector_db()

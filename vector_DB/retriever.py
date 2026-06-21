@@ -15,5 +15,5 @@ embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-
 vector_db = Chroma(persist_directory=CHROMA_PATH,embedding_function=embeddings)
 
 def retrieve_context(query,k=5):
-    docs = vector_db.max_marginal_relevance_search(query,k=k,fetch_k=20)
+    docs = vector_db.max_marginal_relevance_search(query,k=5,fetch_k=20)
     return "\n\n".join(doc.page_content for doc in docs)
