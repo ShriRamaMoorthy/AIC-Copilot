@@ -7,6 +7,8 @@ class CareerState(TypedDict):
     job_skills:list
     match_result:dict
     recommendations:str
+    ats_report:str
     optimized_resume:str
     cover_letter:str
+    retrieved_context:str
     
