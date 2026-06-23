@@ -11,4 +11,6 @@ class CareerState(TypedDict):
     optimized_resume:str
     cover_letter:str
     retrieved_context:str
+    resume_doc_path:str
+    cover_letter_doc_path:str
     

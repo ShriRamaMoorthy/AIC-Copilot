@@ -7,6 +7,8 @@ from agents.graph_recommendation_agent import(graph_recommendation_agent)
 from agents.graph_optimizer_agent import(graph_optimizer_agent)
 from agents.graph_cover_letter_agent import(graph_cover_letter_agent)
 from agents.graph_rag_resume_optimizer_agent import(graph_rag_resume_optimizer_agent)
+from agents.graph_document_generator_agent import(graph_document_generator_agent)
+
 
 def route_after_match(state):
     score = state["match_result"]["match_score"]
@@ -23,6 +25,7 @@ graph.add_node("graph_match_agent",match_agent)
 graph.add_node("graph_recommendation_agent",graph_recommendation_agent)
 graph.add_node("graph_rag_resume_optimizer_agent",graph_rag_resume_optimizer_agent)
 graph.add_node("graph_cover_letter_agent",graph_cover_letter_agent)
+graph.add_node("graph_document_generator_agent",graph_document_generator_agent)
 graph.set_entry_point("graph_resume_agent")
 
 
@@ -39,6 +42,7 @@ graph.add_conditional_edges(
     )
 graph.add_edge("graph_recommendation_agent","graph_rag_resume_optimizer_agent")
 graph.add_edge("graph_rag_resume_optimizer_agent","graph_cover_letter_agent")
-graph.add_edge("graph_cover_letter_agent",END)
+graph.add_edge("graph_cover_letter_agent","graph_document_generator_agent")
+graph.add_edge("graph_document_generator_agent",END)
 
 career_graph = graph.compile()
