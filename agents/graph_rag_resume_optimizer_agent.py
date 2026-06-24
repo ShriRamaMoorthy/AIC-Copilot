@@ -3,7 +3,7 @@ from utils.llm import ask_llm
 
 
 def graph_rag_resume_optimizer_agent(state):
-    resume_text = state["resume_text"]
+    resume_text = state["resume_data"]
     job_description = state["job_description"]
 
     query = f"""
@@ -56,14 +56,20 @@ Requirements:
 
 Rules:
 
-- NEVER invent experience.
-- NEVER invent projects.
-- NEVER invent certifications.
-- NEVER invent achievements.
+- **NEVER invent experience.**
+- **NEVER invent projects.**
+- **NEVER invent certifications.**
+- **NEVER invent achievements.**
 
-If information is unavailable write:
+NEVER invent:
+- email
+- linkedin
+- github
+- phone
 
-"Information not available"
+If information is unavailable write:"Information not available"
+
+Never add technologies that are not present in candidate resume.
 
 Use ATS-friendly formatting.
 

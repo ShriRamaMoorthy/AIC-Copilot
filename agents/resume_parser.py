@@ -1,10 +1,23 @@
 import json
 import re
 from utils.llm import ask_llm
+from prompts.resume_parser_prompt import (RESUME_PARSER_PROMPT)
+import copy
 
-from prompts.resume_parser_prompt import (
-    RESUME_PARSER_PROMPT
-)
+EMPTY_RESUME = {
+        "name":"",
+        "email":"",
+        "phone":"",
+        "linkedin":"",
+        "github":"",
+        "summary":"",
+        "skills":[],
+        "education":[],
+        "experience":[],
+        "projects":[],
+        "certifications":[],
+        "achievements":[]
+    }
 
 
 def parse_resume(resume_text):
@@ -22,11 +35,14 @@ def parse_resume(resume_text):
         response
     ).strip()
     try:
-        return json.loads(response)
+        parsed_data = json.loads(response)
+        for key in EMPTY_RESUME:
+            parsed_data.setdefault(key,copy.deepcopy(EMPTY_RESUME[key]))
+        return parsed_data
+        #return json.loads(response)
 
     except Exception as e:
-
-        return {
-            "error":str(e),
-            "raw_response": response
-        }
+        error_resume = copy.deepcopy(EMPTY_RESUME)
+        error_resume["error"] = str(e)
+        error_resume["raw_response"] =  response
+        return error_resume

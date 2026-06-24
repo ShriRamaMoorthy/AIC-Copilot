@@ -1,30 +1,65 @@
 RESUME_PARSER_PROMPT = """
-You are an expert resume parser.
+You are an expert ATS Resume Parser.
 
-Extract the information from the resume.
+Extract all information from the resume.
 
 IMPORTANT RULES:
-1.Return ONLY valid JSON.
-2.Do not include markdown.
-3.Do not include explanations.
-4.Use ONLY these keys:
 
-{{
-    "name":"",
-    "email":"",
-    "phone":"",
-    "skills":[],
-    "education":[],
-    "experience":[],
-    "projects":[]
-}}
+1. Return ONLY valid JSON.
+2. Do NOT return markdown.
+3. Do NOT return explanations.
+4. Do NOT invent information.
+5. If information is missing use:
+   - "" for strings
+   - [] for arrays
+6. Extract information exactly as found.
+7. Infer technical skills from projects, education and experience when clearly mentioned.
 
-5.If information is missing, use empty string or empty list.
-6.Infer technical skills from projects and experience.
-7.Never create additional keys.
+Return JSON in EXACTLY this schema:
+
+{
+  "name":"",
+  "email":"",
+  "phone":"",
+  "linkedin":"",
+  "github":"",
+
+  "summary":"",
+
+  "skills":[],
+
+  "education":[
+    {
+      "degree":"",
+      "institution":"",
+      "cgpa":"",
+      "year":""
+    }
+  ],
+
+  "experience":[
+    {
+      "role":"",
+      "company":"",
+      "duration":"",
+      "description":""
+    }
+  ],
+
+  "projects":[
+    {
+      "title":"",
+      "description":"",
+      "technologies":[]
+    }
+  ],
+
+  "certifications":[],
+
+  "achievements":[]
+}
 
 Resume:
 
 RESUME_CONTENT
 """
-
