@@ -1,5 +1,6 @@
 from vector_db.retriever import retrieve_context
 from utils.llm import ask_llm
+from utils.ats_scoring import calculate_ats_score
 
 
 def graph_rag_resume_optimizer_agent(state):
@@ -10,6 +11,13 @@ def graph_rag_resume_optimizer_agent(state):
     certifications = resume_text.get("certifications", [])
     achievements = resume_text.get("achievements", [])
     job_description = state["job_description"]
+    job_skills = state.get("job_skills",[])
+    ats_scores = calculate_ats_score(
+        resume_text,
+        job_skills,
+        job_description
+    )
+
 
     query = f"""
     Resume Optimization Guidelines
@@ -102,15 +110,6 @@ Requirements:
 - Experience
 - Education
 
-Include ATS score breakdown:
-
-Keyword Match: X/10
-Education Relevance: X/10
-Project Relevance: X/10
-Experience Strength: X/10
-ATS Formatting Readiness: X/10
-
-Overall ATS Readiness Score: X/10
 
 Provide a Recruiter Perspective section:
 
@@ -221,6 +220,25 @@ Current Skills:
 Missing Skills:
 <skills missing from JD>
 
+ATS Scores (Precomputed):
+Skill Score: {ats_scores['skill_score']}/10
+Project Score: {ats_scores['project_score']}/10
+Education Score: {ats_scores['education_score']}/10
+Experience Score: {ats_scores['experience_score']}/10
+Certification Score: {ats_scores['certification_score']}/10
+
+Overall ATS Score:
+{ats_scores['overall_ats_score']}/100
+
+Use these scores when generating:
+
+- ATS Report
+- Recruiter Perspective
+- Resume Weaknesses
+- ATS Improvement Suggestions
+
+Do not invent scores.
+
 Base ATS report on Structured Resume Data.
 """
     print("\nExecuting graph_rag_resume_optimizer_agent")
@@ -239,6 +257,9 @@ Base ATS report on Structured Resume Data.
     state['retrieved_context'] = rag_context
     state['optimized_resume'] = optimized_resume
     state['ats_report']=ats_report
+    state['ats_scores'] = ats_scores
+    print("\nATS SCORES")
+    print(ats_scores)
 
     # return {
     #     "retrieved_context":rag_context[:1000],
