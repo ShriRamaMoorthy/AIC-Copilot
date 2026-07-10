@@ -14,8 +14,7 @@ def graph_rag_resume_optimizer_agent(state):
     job_skills = state.get("job_skills",[])
     ats_scores = calculate_ats_score(
         resume_text,
-        job_skills,
-        job_description
+        state['job_data']
     )
     ats_analysis = generate_ats_analysis(
         resume_data=resume_text,

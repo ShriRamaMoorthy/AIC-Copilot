@@ -41,6 +41,7 @@ Job Description:
         "job_title":"",
         "skills":[],
         "required_skills":[],
+        "preferred_skills":[],
         "required_experience": "",
         "preferred_experience": "",
         "required_education": "",
