@@ -5,25 +5,67 @@ from utils.llm import ask_llm
 
 def extract_job_skills(job_description):
     prompt = f"""
-Extract al required skills from this description.
-Return ONLY JSON.
+You are an expert Job Description Parser.
+Extract structured information from the job description.
 
+IMPORTANT RULES
+1. Return ONLY valid JSON.
+2. Do NOT return markdown.
+3. Do NOT explain anything.
+4. Do NOT invent information.
+5. If information is missing:
+    - use "" for strings
+    - use [] for arrays
+
+Return EXACTLY this schema:
 {{
-"skills":[]
+"job_title":"",
+"skills":[],
+"required_skills":[],
+"preferred_skills":[],
+"required_experience":"",
+"preferred_experience":"",
+"required_education":"",
+"preferred_education":"",
+"certifications":[],
+"responsibilities":[],
+"soft_skills":[],
+"keywords":[]
 }}
 
 Job Description:
 {job_description}
 """
+    
+    EMPTY_JOB = {
+        "job_title":"",
+        "skills":[],
+        "required_skills":[],
+        "required_experience": "",
+        "preferred_experience": "",
+        "required_education": "",
+        "preferred_education": "",
+        "certifications": [],
+        "responsibilities": [],
+        "soft_skills": [],
+        "keywords": []
+    }
+
     response = ask_llm(prompt)
     response = response.replace("```json", "")
     response = response.replace("```", "")
     response = response.strip()
 
     try:
-        return json.loads(response)
+        parsed = json.loads(response)
+
+        for key in EMPTY_JOB:
+            parsed.setdefault(key,EMPTY_JOB[key])
+        
+        return parsed
+    
     except Exception as e:
-        return{
-            "error":str(e),
-            "raw_response":response
-        }
+        error_job = EMPTY_JOB.copy()
+        error_job["error"]=str(e)
+        error_job["raw_response"]=response
+        return error_job

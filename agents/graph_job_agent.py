@@ -4,4 +4,5 @@ def job_agent(state):
     print("\nExecuting graph_job_agent")
     result = extract_job_skills(state["job_description"])
     state['job_skills']=result.get("skills",[])
+    state['job_data']=result
     return state

@@ -1,7 +1,7 @@
 from vector_db.retriever import retrieve_context
 from utils.llm import ask_llm
 from utils.ats_scoring import calculate_ats_score
-
+from utils.ats_analysis import generate_ats_analysis
 
 def graph_rag_resume_optimizer_agent(state):
     resume_text = state["resume_data"]
@@ -16,6 +16,12 @@ def graph_rag_resume_optimizer_agent(state):
         resume_text,
         job_skills,
         job_description
+    )
+    ats_analysis = generate_ats_analysis(
+        resume_data=resume_text,
+        job_data=state["job_data"],
+        ats_scores=ats_scores,
+        match_result=state["match_result"]
     )
 
 
@@ -257,7 +263,8 @@ Base ATS report on Structured Resume Data.
     state['retrieved_context'] = rag_context
     state['optimized_resume'] = optimized_resume
     state['ats_report']=ats_report
-    state['ats_scores'] = ats_scores
+    state['ats_analysis']=ats_analysis
+    #state['ats_scores'] = ats_scores
     print("\nATS SCORES")
     print(ats_scores)
 
